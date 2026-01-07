@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi portafolio Full Stack</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f0f0f0; }
+        .card { background: white; padding: 15px; margin-bottom: 10px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h1 { color: #333; }
+        .date { color: #888; font-size: 0.9em; }
+        .tech { color: #0066cc; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>👨‍💻 Mi Portafolio</h1>
+
+    <h2>Experiencia Laboral</h2>
+    <div id="experience-list">
+        <p>Cargando datos...</p>
+    </div>
+
+    <hr>
+
+    <h2>Mis Proyectos</h2>
+    <div id="projects-list">
+        <p>Cargando datos...</p>
+    </div>
+
+    <script>
+        
+        const API_URL = "http://127.0.0.1:5000";
+
+   
+        fetch(API_URL + '/experience')          
+            .then(response => response.json())  
+            .then(data => {                     
+                const container = document.getElementById('experience-list');
+                container.innerHTML = "";       
+                
+                
+                data.forEach(job => {
+                    const html = `
+                        <div class="card">
+                            <h3>${job.role} en ${job.company}</h3>
+                            <p class="date">${job.start_date} - ${job.end_date || 'Presente'}</p>
+                            <p>${job.description}</p>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            })
+            .catch(error => console.error('Error:', error));
+
+        fetch(API_URL + '/projects')
+            .then(response => response.json())
+            .then(data => {
+                const container = document.getElementById('projects-list');
+                container.innerHTML = "";
+                
+                data.forEach(project => {
+                    const html = `
+                        <div class="card">
+                            <h3>${project.name}</h3>
+                            <p>${project.description}</p>
+                            <p class="tech">Tecnologías: ${project.tech_stack}</p>
+                            <a href="${project.repo_url}" target="_blank">Ver Código</a>
+                        </div>
+                    `;
+                    container.innerHTML += html;
+                });
+            });
+    </script>
+</body>
+</html>
