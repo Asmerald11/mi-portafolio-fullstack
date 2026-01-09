@@ -1,3 +1,4 @@
+import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from flask import Flask, jsonify
@@ -8,16 +9,21 @@ CORS(app)
 
 def get_db_connection():
     try:
-        conn = psycopg2.connect(
-            dbname="portfolio_db",
-            user="postgres",
-            password="Asmerald12.",
-            host="localhost",
-            port="5432"
-        )
+        DATABASE_URL = os.environ.get('DATABASE_URL')
+        
+        if DATABASE_URL:
+            conn = psycopg2.connect(DATABASE_URL)
+        else:
+            conn = psycopg2.connect(
+                dbname="portfolio_db",
+                user="postgres",
+                password="Asmerald12.",
+                host="localhost",
+                port="5432"
+            )
         return conn
     except Exception as e:
-        print("Error conectando a la DB", e)
+        print("Error conectando a la DB:", e)
         return None
     
 @app.route('/')
