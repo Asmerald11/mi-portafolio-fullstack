@@ -1,23 +1,23 @@
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
 
+
 def get_db_connection():
     try:
         DATABASE_URL = os.environ.get('DATABASE_URL')
-        
         if DATABASE_URL:
             conn = psycopg2.connect(DATABASE_URL)
         else:
             conn = psycopg2.connect(
                 dbname="portfolio_db",
                 user="postgres",
-                password="Asmerald12.",
+                password="TU_CONTRASEÑA_LOCAL", 
                 host="localhost",
                 port="5432"
             )
@@ -25,49 +25,50 @@ def get_db_connection():
     except Exception as e:
         print("Error conectando a la DB:", e)
         return None
-    
+
+
 @app.route('/')
 def home():
-    return "<h1>Bienvenido a la API de mi Portafolio</h1><p>Prueba ir a <a href='/experience'>/experience</a> o <a href='/projects'>/projects</a></p>"
+   
+    return send_from_directory('.', 'index.html')
+
+
+@app.route('/style.css')
+def style():
+ 
+    return send_from_directory('.', 'style.css')
 
 
 @app.route('/experience')
 def experience():
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    
- 
-    query = """
-        SELECT id, company, role, description, is_current, 
-               start_date::text, end_date::text 
-        FROM experience 
-        ORDER BY start_date DESC;
-    """
-    
-    cur.execute(query)
-    results = cur.fetchall()
-    
-    cur.close()
-    conn.close()
-    
-  
-    return jsonify(results)
+    if conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        query = """
+            SELECT id, company, role, description, is_current, 
+                   start_date::text, end_date::text 
+            FROM experience 
+            ORDER BY start_date DESC;
+        """
+        cur.execute(query)
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(results)
+    return jsonify([])
 
 @app.route('/projects')
 def projects():
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
-    
-    query = "SELECT * FROM projects;"
-    
-    cur.execute(query)
-    results = cur.fetchall()
-    
-    cur.close()
-    conn.close()
-    
-    return jsonify(results)
-
+    if conn:
+        cur = conn.cursor(cursor_factory=RealDictCursor)
+        query = "SELECT * FROM projects;"
+        cur.execute(query)
+        results = cur.fetchall()
+        cur.close()
+        conn.close()
+        return jsonify(results)
+    return jsonify([])
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
